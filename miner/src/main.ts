@@ -8,11 +8,12 @@ function main() {
     parseArgs();
     dotenv.config()
     const githubOctokitEndpointAdapter = new GithubOctokit();
-    githubOctokitEndpointAdapter.fetch({
+    let i = 0;
+    githubOctokitEndpointAdapter.fetchIssues({
         owner: flags.owner,
         repo: flags.repo,
         privateAccessToken: process.env.PATOKEN
-    }).then(console.log);
+    }).subscribe(console.log);
 }
 
 function parseArgs() {

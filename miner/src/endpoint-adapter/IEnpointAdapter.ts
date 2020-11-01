@@ -1,3 +1,6 @@
+import {Observable} from "rxjs";
+import {Issue} from "../models/Issue";
+
 export interface IEndpointAdapter {
-    fetch:(config:any)=>any,
+    fetchIssues:(config:any)=>Observable<[Issue]>,
 }

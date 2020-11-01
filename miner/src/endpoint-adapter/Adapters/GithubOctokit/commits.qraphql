@@ -1,0 +1,25 @@
+{
+  repository(name: "graphql.js", owner: "octokit") {
+    defaultBranchRef {
+      name
+      target {
+        ... on Commit {
+          id
+          history(first: 10) {
+            pageInfo {
+              endCursor
+              startCursor
+            }
+            edges {
+              node {
+                oid
+                id
+                messageBody
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
