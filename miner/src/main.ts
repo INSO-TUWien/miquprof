@@ -14,6 +14,16 @@ function main() {
         repo: flags.repo,
         privateAccessToken: process.env.PATOKEN
     }).subscribe(console.log);
+    // githubOctokitEndpointAdapter.fetchActions({
+    //     owner: flags.owner,
+    //     repo: flags.repo,
+    //     privateAccessToken: process.env.PATOKEN
+    // }).subscribe(console.log);
+    // githubOctokitEndpointAdapter.fetchCommits({
+    //     owner: flags.owner,
+    //     repo: flags.repo,
+    //     privateAccessToken: process.env.PATOKEN
+    // }).subscribe(console.log);
 }
 
 function parseArgs() {

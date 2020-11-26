@@ -1,15 +1,15 @@
-import {Author} from "./Author";
+import {User} from "./User";
 
 export class Issue {
     public id: string;
-    public author: Author;
+    public author: User;
     public createdAt: Date;
     public closed: Boolean;
     public title: String;
     public number: Number;
     public textBody: String;
 
-    constructor(id: string, author: Author, createdAt: Date, closed: Boolean, title: String, number: Number, textBody: String) {
+    constructor(id: string, author: User, createdAt: Date, closed: Boolean, title: String, number: Number, textBody: String) {
         this.id = id;
         this.author = author;
         this.createdAt = createdAt;

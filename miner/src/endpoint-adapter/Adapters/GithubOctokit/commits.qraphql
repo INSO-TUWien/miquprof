@@ -4,18 +4,11 @@
       name
       target {
         ... on Commit {
-          id
           history(first: 10) {
-            pageInfo {
-              endCursor
-              startCursor
-            }
-            edges {
-              node {
-                oid
-                id
-                messageBody
-              }
+            nodes {
+              id
+              pushedDate
+              message
             }
           }
         }
