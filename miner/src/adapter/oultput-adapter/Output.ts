@@ -26,9 +26,14 @@ export class OutputJSON implements IOutputAdapter{
         const outputDir = process.env.OUT !== undefined? process.env.OUT : "~/tmp"
         console.log(outputDir)
         fsextra.ensureDirSync(outputDir);
+        console.log("Exported:")
         fs.writeFile(`${process.env.OUT}/issues.json`, JSON.stringify(this.issues),err => {
             if (err) throw err;
-            console.log("Done writing"); // Success
+            console.log("\tissues.json");
+        });
+        fs.writeFile(`${process.env.OUT}/commits.json`, JSON.stringify(this.commits),err => {
+            if (err) throw err;
+            console.log("\tcommits.json");
         });
     }
 }
