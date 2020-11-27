@@ -1,25 +1,32 @@
 import args from 'args';
 import dotenv from 'dotenv';
-import { GithubOctokit } from "./endpoint-adapter/Adapters/GithubOctokit/GithubOctokit";
+import { GithubOctokitIssueAdapter } from "./adapter/endpoint-adapter/adapters/githubOctokit/GithubOctokitIssueAdapter";
+import {GithubOctokitCommitAdapter} from "./adapter/endpoint-adapter/adapters/githubOctokit/GithubOctokitCommitAdapter";
+import {Indexer} from "./adapter/indexer-adapter/Indexer";
+import {OutputJSON} from "./adapter/oultput-adapter/Output";
 
 let flags: any;
 
 function main() {
     parseArgs();
     dotenv.config()
-    const githubOctokitEndpointAdapter = new GithubOctokit();
-    let i = 0;
-    githubOctokitEndpointAdapter.fetchIssues({
+    const ouputAdapter = new OutputJSON();
+    const indexer = new Indexer(ouputAdapter)
+    const githubOctokitIssueAdapter = new GithubOctokitIssueAdapter();
+    const githubOctokitCommitAdapter = new GithubOctokitCommitAdapter();
+    const issueObservable = githubOctokitIssueAdapter.fetchIssues({
         owner: flags.owner,
         repo: flags.repo,
         privateAccessToken: process.env.PATOKEN
-    }).subscribe(console.log);
+    });
+    const commitObservable = githubOctokitCommitAdapter.fetchCommits({
+        owner: flags.owner,
+        repo: flags.repo,
+        privateAccessToken: process.env.PATOKEN
+    });
+    indexer.indexIssues(issueObservable);
+    indexer.indexCommits(commitObservable);
     // githubOctokitEndpointAdapter.fetchActions({
-    //     owner: flags.owner,
-    //     repo: flags.repo,
-    //     privateAccessToken: process.env.PATOKEN
-    // }).subscribe(console.log);
-    // githubOctokitEndpointAdapter.fetchCommits({
     //     owner: flags.owner,
     //     repo: flags.repo,
     //     privateAccessToken: process.env.PATOKEN

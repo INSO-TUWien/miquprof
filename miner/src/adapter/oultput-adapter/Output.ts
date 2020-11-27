@@ -1,0 +1,34 @@
+import {IOutputAdapter} from "./IOutputAdapter";
+import {Commit} from "../../models/Commit";
+import {Issue} from "../../models/Issue";
+import {User} from "../../models/User";
+import * as fs from "fs";
+import * as fsextra from "fs-extra"
+
+export class OutputJSON implements IOutputAdapter{
+    private issues: Issue[] = [];
+    private users: User[] = [];
+    private commits: Commit[] = [];
+
+    exportCommit(commit: Commit): void {
+        this.commits.push(commit);
+    }
+
+    exportIssue(issue: Issue): void {
+        this.issues.push(issue);
+    }
+
+    exportUser(user: User): void {
+        this.users.push(user);
+    }
+
+    close(): void {
+        const outputDir = process.env.OUT !== undefined? process.env.OUT : "~/tmp"
+        console.log(outputDir)
+        fsextra.ensureDirSync(outputDir);
+        fs.writeFile(`${process.env.OUT}/issues.json`, JSON.stringify(this.issues),err => {
+            if (err) throw err;
+            console.log("Done writing"); // Success
+        });
+    }
+}
