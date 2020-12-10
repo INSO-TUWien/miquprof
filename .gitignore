@@ -4,3 +4,4 @@ build
 yarn.lock
 .env
 out
+website/src/website/js
