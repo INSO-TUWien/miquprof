@@ -1,7 +1,7 @@
 import {IOutputAdapter} from "./IOutputAdapter";
-import {Commit} from "../../models/Commit";
-import {Issue} from "../../models/Issue";
-import {User} from "../../models/User";
+import {Commit} from "../indexer-adapter/outputModels/Commit";
+import {Issue} from "../indexer-adapter/outputModels/Issue";
+import {User} from "../indexer-adapter/outputModels/User";
 import * as fs from "fs";
 import * as fsextra from "fs-extra"
 

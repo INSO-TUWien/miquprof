@@ -1,7 +1,10 @@
 import {IOutputAdapter} from "../oultput-adapter/IOutputAdapter";
 import {IIssueIndexer} from "./interfaces/IIssueIndexer";
-import {Issue} from "../../models/Issue";
-import {Commit} from "../../models/Commit";
+import {Issue} from "../endpoint-adapter/outputModels/Issue";
+import {Issue as OutputIssue} from "../indexer-adapter/outputModels/Issue";
+import {Commit} from "../endpoint-adapter/outputModels/Commit";
+import {Commit as OutputCommit} from "../indexer-adapter/outputModels/Commit";
+import {User as OutputUser} from "../indexer-adapter/outputModels/User";
 import {ICommitIndexer} from "./interfaces/ICommitIndexer";
 import {Observable} from "rxjs";
 
@@ -21,9 +24,9 @@ export class Indexer implements IIssueIndexer, ICommitIndexer{
                 .forEach((issue) => {
                     if (this.usersEmails.filter((email) => issue.author.email === email).length <= 0) {
                         this.usersEmails.push(issue.author.email);
-                        this.outputAdapter.exportUser(issue.author);
+                        this.outputAdapter.exportUser(new OutputUser(issue.author.id, issue.author.login, issue.author.email));
                     }
-                    this.outputAdapter.exportIssue(issue);
+                    this.outputAdapter.exportIssue(new OutputIssue(issue.id, issue.author.id, issue.createdAt, issue.closed, issue.title, issue.number, issue.textBody));
                 });
         }, e => console.log(e), () => {
             this.issuesFinished = true;
@@ -32,7 +35,7 @@ export class Indexer implements IIssueIndexer, ICommitIndexer{
     }
 
     public indexCommits(commitObservable:Observable<Commit[]>): void {
-        commitObservable.subscribe(commits => commits.forEach(commit => this.outputAdapter.exportCommit(commit)), (e) => console.log(e), () => {
+        commitObservable.subscribe(commits => commits.forEach(commit => this.outputAdapter.exportCommit(new OutputCommit(commit.id, commit.pushedDate, commit.message, commit.changedFiles, commit.additions, commit.deletions))), (e) => console.log(e), () => {
             this.commitsFinished = true;
             this.checkFinished();
         })

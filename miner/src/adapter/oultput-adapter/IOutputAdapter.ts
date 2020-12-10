@@ -1,6 +1,7 @@
-import {Issue} from "../../models/Issue";
-import {Commit} from "../../models/Commit";
-import {User} from "../../models/User";
+import {Issue} from "../indexer-adapter/outputModels/Issue";
+import {Commit} from "../indexer-adapter/outputModels/Commit";
+import {User} from "../indexer-adapter/outputModels/User";
+
 
 export interface IOutputAdapter {
     exportIssue(issue: Issue): void;

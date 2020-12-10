@@ -1,8 +1,8 @@
 import {IConfigGithubOctokit} from "./config/IConfigGithubOctokit";
 import {Observable, throwError} from "rxjs";
-import {Issue} from "../../../../models/Issue";
-import {User} from "../../../../models/User";
-import {Cursor} from "../../../../models/Cursor";
+import {Issue} from "../../outputModels/Issue";
+import {User} from "../../outputModels/User";
+import {Cursor} from "../../outputModels/Cursor";
 import {combineFetch} from "../../helperFunctions/combineFetch";
 
 const {graphql} = require("@octokit/graphql");

@@ -1,5 +1,5 @@
 export class Issue {
-    public id: string;
+    public _id: string;
     public authorId: string;
     public createdAt: Date;
     public closed: Boolean;
@@ -8,7 +8,7 @@ export class Issue {
     public textBody: String;
 
     constructor(id: string, authorId: string, createdAt: Date, closed: Boolean, title: String, number: Number, textBody: String) {
-        this.id = id;
+        this._id = id;
         this.authorId = authorId;
         this.createdAt = createdAt;
         this.closed = closed;
