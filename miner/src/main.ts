@@ -1,17 +1,10 @@
 import args from 'args';
 import dotenv from 'dotenv';
-import { GithubOctokitIssueAdapter } from "./adapter/endpoint-adapter/adapters/githubOctokit/GithubOctokitIssueAdapter";
-import {GithubOctokitCommitAdapter} from "./adapter/endpoint-adapter/adapters/githubOctokit/GithubOctokitCommitAdapter";
-import {Indexer} from "./adapter/indexer-adapter/Indexer";
-import {OutputJSON} from "./adapter/oultput-adapter/Output";
-import { GithubOctokitActionsAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/GithubOctokitActionsAdapter';
-import {Branch, fetchBranches } from './adapter/endpoint-adapter/adapters/githubOctokit/BranchAdapter';
-import { Commit } from './adapter/indexer-adapter/outputModels/Commit';
-import { fetchCommits } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
+import { Branch, fetchBranches } from './adapter/endpoint-adapter/adapters/githubOctokit/BranchAdapter';
+import { fetchCommitData, fetchCommits } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
 import { Pipeline } from './adapter/endpoint-adapter/helpers/pipleine';
 import { IConfigGithubOctokit } from './adapter/endpoint-adapter/adapters/githubOctokit/config/IConfigGithubOctokit';
-import { Observable, pipe } from 'rxjs';
-import { Console } from 'console';
+import { Octokit } from '@octokit/rest';
 
 let flags: any;
 
@@ -28,20 +21,15 @@ function main() {
         repo: flags.repo,
         privateAccessToken: process.env.PATOKEN
     };
-    // const issueObservable = githubOctokitIssueAdapter.fetchIssues(config);
-    // const commitObservable = githubOctokitCommitAdapter.fetchCommits(config);
-    // indexer.indexIssues(issueObservable);
-    // indexer.indexCommits(commitObservable);
-    // githubOctokitEndpointAdapter.fetchActions({
-    //     owner: flags.owner,
-    //     repo: flags.repo,
-    //     privateAccessToken: process.env.PATOKEN
-    // }).subscribe(console.log);
-    const pipeline = new Pipeline<IConfigGithubOctokit, Branch[]>(config);
+    const octokit = new Octokit({
+        auth: `token ${config.privateAccessToken}`
+      });
+    const pipeline = new Pipeline<IConfigGithubOctokit, Octokit, Branch[]>(config, octokit);
     pipeline
         .start(fetchBranches)
         .then(fetchCommits)
-        .output({next: console.log,});
+        .then(fetchCommitData)
+        .output({next: data => console.log(JSON.stringify(data, null, 1))});
 }
 
 function parseArgs() {

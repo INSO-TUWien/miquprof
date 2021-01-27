@@ -1,56 +1,77 @@
 import {IConfigGithubOctokit} from "./config/IConfigGithubOctokit";
 import { Observable } from "rxjs";
-import { Octokit } from "@octokit/rest";
+import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { Branch } from "./BranchAdapter";
-
+import { checkOctokitResult } from "../../helpers/checkOctokitResult";
+import { createBranchObservable } from "./createBranchObservable";
 export interface Commit {
-  message: string
+  message: string | undefined,
+  sha: string,
+  tree: CommitTree | undefined
 }
 
-export function fetchCommits (config: IConfigGithubOctokit, pipeline: Observable<Branch[]>) {
-  return new Observable<Branch[]>(subscriber => {
-    const observer = {
-      next: async (branches: Branch[]) => {
-          const octokit = new Octokit({
-            auth: `token ${config.privateAccessToken}`
+export interface CommitTree {
+  sha: string
+}
+
+export function fetchCommits (config: IConfigGithubOctokit, octokit:Octokit,  pipeline: Observable<Branch[]>) {
+  return createBranchObservable(async (branches: Branch[], subscriber) => {
+      return await Promise.all(
+        branches.map(async branch => {
+          const res = await octokit.repos.listCommits({
+            owner: config.owner,
+            repo: config.repo,
+            sha: branch.sha,
+            per_page: 5 // TODO: pagination and fetch all
           });
-          const result = await Promise.all(branches.map(async branch => {
-            const res = await octokit.repos.listCommits({
-              owner: config.owner,
-              repo: config.repo,
-              sha: branch.sha,
-              per_page: 5 // TODO: pagination and fetch all
-            });
-            if (res.status !== 200) {
-              subscriber.error('fetch commits did not return successfully!');
-            }
-            if (res.data === undefined || !Array.isArray(res.data)) {
-              subscriber.error('fetch commits did not return valid data!')
-            }
-            branch.history = res.data.map(data => {
-              console.log(data.commit)
-              return {
-                message: data.commit.message
-              }
-            });
+          if (checkOctokitResult(res, subscriber)) {
             return branch;
-          }));
-          subscriber.next(result);
-      },
-      error: subscriber.error,
-    };
-    pipeline.subscribe(observer);
-  });
+          }
+          // branch.history = await Promise.all(
+          //   res.data.map(async data => {
+          //     console.log(data.files)
+          //     return {
+          //         message: '',
+          //         sha: '',
+          //         tree: []
+          //     };
+          //   }));
+          branch.history = res.data.map(value => {
+            return {
+              sha: value.sha
+            } as Commit;
+          })
+        return branch;
+      }));
+  }, pipeline);
 }
-  // fetchCommit: async (config: IConfigGithubOctokit) => {
-  //   return new Observable<Commit[]>(subscriber => {
-  //       const observer = {
-  //         next: async (Commit) => {
 
-  //         },
-  //       }
-  //   });
-  // }
+export function fetchCommitData(config: IConfigGithubOctokit, octokit:Octokit, pipeline: Observable<Branch[]>) {
+  return createBranchObservable(async (branches: Branch[], subscriber) => {
+    return await Promise.all(branches.map(async branch => {
+        const history = await Promise.all(branch.history.map(async (commit: Commit) => {
+          const res = await octokit.git.getCommit({
+            repo: config.repo,
+            owner: config.owner,
+            commit_sha: commit.sha
+          });
+          if (checkOctokitResult(res, subscriber)) {
+            return commit;
+          }
+          return {
+            sha: commit.sha,
+            message: res.data.message,
+            tree: {
+              sha: res.data.tree.sha
+            }
+          };
+        }));
+        branch.history = history;
+        return branch;
+    }));
+}, pipeline);
+}
 
-
-
+// export function fetchTrees(config: IConfigGithubOctokit, octokit:Octokit, pipeline: Observable<Branch[]>) {
+//   // return new Observa
+// }
