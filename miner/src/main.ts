@@ -1,7 +1,7 @@
 import args from 'args';
 import dotenv from 'dotenv';
 import { Branch, fetchBranches } from './adapter/endpoint-adapter/adapters/githubOctokit/BranchAdapter';
-import { fetchCommitData, fetchCommits } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
+import { fetchCommitData, fetchCommitFiles, fetchCommits } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
 import { Pipeline } from './adapter/endpoint-adapter/helpers/pipleine';
 import { IConfigGithubOctokit } from './adapter/endpoint-adapter/adapters/githubOctokit/config/IConfigGithubOctokit';
 import { Octokit } from '@octokit/rest';
@@ -29,6 +29,8 @@ function main() {
         .start(fetchBranches)
         .then(fetchCommits)
         .then(fetchCommitData)
+        .then(fetchCommitFiles)
+        // .then(fetchCommitTrees)
         .output({next: data => console.log(JSON.stringify(data, null, 1))});
 }
 
