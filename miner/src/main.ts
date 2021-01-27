@@ -28,9 +28,8 @@ function main() {
     pipeline
         .start(fetchBranches)
         .then(fetchCommits)
-        .then(fetchCommitData)
-        .then(fetchCommitFiles)
-        // .then(fetchCommitTrees)
+        // .then(fetchCommitData)
+        // .then(fetchCommitFiles)
         .output({next: data => console.log(JSON.stringify(data, null, 1))});
 }
 

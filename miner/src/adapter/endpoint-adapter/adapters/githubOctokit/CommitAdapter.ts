@@ -29,21 +29,28 @@ export function fetchCommits (config: IConfigGithubOctokit, octokit:Octokit,  pi
   return createBranchObservable(async (branches: Branch[], subscriber) => {
       return await Promise.all(
         branches.map(async branch => {
-          const res = await octokit.repos.listCommits({
-            owner: config.owner,
-            repo: config.repo,
-            sha: branch.sha,
-            per_page: 5 // TODO: pagination and fetch all
-          });
-          if (checkOctokitResult(res, subscriber)) {
-            return branch;
+          let running = true;
+          const per_page = 10; 
+          let page = 1;
+          while (running) {
+            const res = await octokit.repos.listCommits({
+              owner: config.owner,
+              repo: config.repo,
+              sha: branch.sha,
+              per_page: per_page,
+              page: page++
+            });
+            if (checkOctokitResult(res, subscriber)) {
+              return branch;
+            }
+            running = res.data.length === per_page;
+            branch.history = branch.history.concat(res.data.map(value => {
+              return {
+                sha: value.sha
+              } as Commit;
+            }));
           }
-          branch.history = res.data.map(value => {
-            return {
-              sha: value.sha
-            } as Commit;
-          })
-        return branch;
+          return branch;
       }));
   }, pipeline);
 }
