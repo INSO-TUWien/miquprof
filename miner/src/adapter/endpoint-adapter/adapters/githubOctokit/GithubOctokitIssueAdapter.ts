@@ -3,7 +3,7 @@ import {Observable, throwError} from "rxjs";
 import {Issue} from "../../outputModels/Issue";
 import {User} from "../../outputModels/User";
 import {Cursor} from "../../outputModels/Cursor";
-import {combineFetch} from "../../helperFunctions/combineFetch";
+import {combineFetch} from "../../helpers/combineFetch";
 
 const {graphql} = require("@octokit/graphql");
 
