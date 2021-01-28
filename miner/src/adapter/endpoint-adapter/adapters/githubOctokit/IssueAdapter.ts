@@ -1,24 +1,25 @@
 import { IConfigGithubOctokit } from "./config/IConfigGithubOctokit";
 import { Observable, Subscriber } from "rxjs";
 import { Octokit } from "@octokit/rest";
-import { Commit } from "./CommitAdapter";
 import { checkOctokitResult } from "../../helpers/checkOctokitResult";
 
-export interface Branch {
-  name:string,
-  history: Commit[],
-  id: string,
-  protected: boolean
+export interface Issue {
+    id: number,
+    number: number,
+    title: string,
+    comments: number,
+    updated_at: string,
+    labels: string[]
 }
 
-export function fetchBranches (config: IConfigGithubOctokit, octokit: Octokit) {
-  let result = new Observable<Branch[]>(subscriber => {
+export function fetchIssues (config: IConfigGithubOctokit, octokit: Octokit) {
+  let result = new Observable<Issue[]>(subscriber => {
     const fetch = async() => {
       let page = 1;
       let running = true;
       const fetchPerPage = 10;
       do {
-        const res = await octokit.repos.listBranches({
+        const res = await octokit.issues.listForRepo({
           owner: config.owner,
           repo: config.repo,
           per_page: fetchPerPage,
@@ -28,12 +29,15 @@ export function fetchBranches (config: IConfigGithubOctokit, octokit: Octokit) {
           running = false;
         } else {
           running = res.data.length === fetchPerPage;
-          subscriber.next(res.data.map(branch => {
+          subscriber.next(res.data.map(issue => {
             return {
-              name: branch.name,
-              id: branch.commit.sha,
-              history: [],
-              protected: branch.protected
+              id: issue.id,
+              number: issue.number,
+              title: issue.title,
+              comments: issue.comments,
+              updated_at: issue.updated_at,
+              labels: issue.labels.map(label => label.name)
+              // todo: maybe add PR or other data like user
             }
           }));
         }

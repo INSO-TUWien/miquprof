@@ -4,6 +4,7 @@ import { Pipeline } from './adapter/endpoint-adapter/helpers/pipleine';
 import { Octokit } from '@octokit/rest';
 import { OutputJSON } from './adapter/oultput-adapter/Output';
 import { ActionAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/ActionAdapter';
+import { fetchIssues } from './adapter/endpoint-adapter/adapters/githubOctokit/IssueAdapter';
 
 let flags: any;
 
@@ -30,13 +31,13 @@ function main() {
     //     .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
     //     .output({next: (commits) => ouputAdapter.exportCommit(commits)});
         
-        // .then(fetchCommits)
-        // .then(fetchCommitData)
-        // .then(fetchCommitFiles)
-        // .output({next: data => console.log(JSON.stringify(data, null, 1))});
-        Pipeline
-            .start(() => new ActionAdapter(config, octokit).fetch())
-            .output({next: data => console.log(JSON.stringify(data, null, 1))});;
+    // Pipeline
+    //     .start(() => new ActionAdapter(config, octokit).fetch())
+    //     .output({next: data => console.log(JSON.stringify(data, null, 1))});;
+
+    Pipeline
+        .start(() => fetchIssues(config, octokit))
+        .output({next: data => console.log(JSON.stringify(data, null, 1))});
     
 }
 

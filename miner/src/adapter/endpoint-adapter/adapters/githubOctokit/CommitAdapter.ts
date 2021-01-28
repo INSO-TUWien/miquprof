@@ -14,7 +14,7 @@ export interface CommitTree {
 }
 
 export interface TreeFile {
-  sha: string | undefined,
+  id: string | undefined,
   filename: string | undefined,
   additions: number | undefined,
   deletions: number | undefined,
@@ -101,7 +101,7 @@ export class CommitAdapter {
 
       commit.files = res.data.files?.map(file => {
         return {
-          sha: file.sha,
+          id: file.sha,
           filename: file.filename,
           additions: file.additions,
           deletions: file.deletions,

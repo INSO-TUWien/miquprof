@@ -7,8 +7,8 @@ export  function indexBranches (pipeline: Observable<Branch[]>) {
         const observer = {
             next: (branches: Branch[]) => {
                 const newIds = branches
-                    .filter(branch => !branchIds.includes(branch.sha))
-                    .map(branch => branch.sha);
+                    .filter(branch => !branchIds.includes(branch.id))
+                    .map(branch => branch.id);
                 branchIds = branchIds.concat(newIds);
                 subscriber.next(newIds);
             },

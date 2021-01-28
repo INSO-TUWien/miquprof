@@ -11,7 +11,7 @@ export class OutputJSON{
     }
 
     public exportBranch(branches: Branch[]): void {
-        branches.forEach(branch => this.write(branch, `Branch-${branch.sha}`));
+        branches.forEach(branch => this.write(branch, `Branch-${branch.id}`));
     }
 
     // exportIssue(issue: Issue): void {
