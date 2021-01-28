@@ -7,7 +7,7 @@ export class OutputJSON{
     private exportStarted = false;
 
     public exportCommit(commits: Commit[]): void {
-        commits.forEach(commit => this.write(commit, `Commit-${commit.sha}`));
+        commits.forEach(commit => this.write(commit, `Commit-${commit.id}`));
     }
 
     public exportBranch(branches: Branch[]): void {
@@ -23,7 +23,7 @@ export class OutputJSON{
     // }
 
     public write(obj: any, filename: string) {
-        const outputDir = process.env.OUT !== undefined? process.env.OUT : "~/tmp"
+        const outputDir = process.env.OUT !== undefined? process.env.OUT : "tmp"
         if (!this.exportStarted) {
             console.log(outputDir)
             fsextra.ensureDirSync(outputDir);
@@ -35,23 +35,4 @@ export class OutputJSON{
             console.log("\b" + `${filename}.json`);
         });
     }
-
-    // public close(): void {
-    //     const outputDir = process.env.OUT !== undefined? process.env.OUT : "~/tmp"
-    //     console.log(outputDir)
-    //     fsextra.ensureDirSync(outputDir);
-    //     console.log("Exported:")
-    //     // fs.writeFile(`${process.env.OUT}/issues.json`, JSON.stringify(this.issues),err => {
-    //     //     if (err) throw err;
-    //     //     console.log("\tissues.json");
-    //     // });
-    //     fs.writeFile(`${process.env.OUT}/branches.json`, JSON.stringify(this.commits),err => {
-    //         if (err) throw err;
-    //         console.log("\branches.json");
-    //     });
-    //     fs.writeFile(`${process.env.OUT}/commits.json`, JSON.stringify(this.commits),err => {
-    //         if (err) throw err;
-    //         console.log("\tcommits.json");
-    //     });
-    // }
 }

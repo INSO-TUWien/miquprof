@@ -1,16 +1,15 @@
 import {IConfigGithubOctokit} from "./config/IConfigGithubOctokit";
 import { Observable } from "rxjs";
 import { Octokit } from "@octokit/rest";
-import { sub } from "args";
 export interface Commit {
   message: string | undefined,
-  sha: string,
+  id: string,
   tree: CommitTree | undefined,
   files: any | undefined
 }
 
 export interface CommitTree {
-  sha: string,
+  id: string,
   files: TreeFile[] | undefined // todo: change typing
 }
 
@@ -84,9 +83,9 @@ export class CommitAdapter {
       this.checkOctokitResult(res);
       const commit = res.data;
       return {
-        sha,
+        id: sha,
         message: commit.message,
-        tree: { sha: commit.tree.sha}
+        tree: { id: commit.tree.sha}
       } as Commit;
     }));
   }
@@ -96,7 +95,7 @@ export class CommitAdapter {
       const res = await this.octokit.repos.getCommit({
         repo: this.config.repo,
         owner: this.config.owner,
-        ref: commit.sha
+        ref: commit.id
       });
       this.checkOctokitResult(res);
 

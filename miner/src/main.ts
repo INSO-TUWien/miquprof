@@ -1,11 +1,9 @@
 import args from 'args';
 import dotenv from 'dotenv';
-import { fetchBranches } from './adapter/endpoint-adapter/adapters/githubOctokit/BranchAdapter';
 import { Pipeline } from './adapter/endpoint-adapter/helpers/pipleine';
 import { Octokit } from '@octokit/rest';
-import { indexBranches } from './adapter/indexer-adapter/branchIndexer';
-import { CommitAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
 import { OutputJSON } from './adapter/oultput-adapter/Output';
+import { ActionAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/ActionAdapter';
 
 let flags: any;
 
@@ -26,16 +24,20 @@ function main() {
       });
 
     const ouputAdapter = new OutputJSON();
-    Pipeline
-        .start(() => fetchBranches(config, octokit))
-        .nextSplit(indexBranches, { next: branches => ouputAdapter.exportBranch(branches) })
-        .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
-        .output({next: (commits) => ouputAdapter.exportCommit(commits)});
+    // Pipeline
+    //     .start(() => fetchBranches(config, octokit))
+    //     .nextSplit(indexBranches, { next: branches => ouputAdapter.exportBranch(branches) })
+    //     .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
+    //     .output({next: (commits) => ouputAdapter.exportCommit(commits)});
         
         // .then(fetchCommits)
         // .then(fetchCommitData)
         // .then(fetchCommitFiles)
         // .output({next: data => console.log(JSON.stringify(data, null, 1))});
+        Pipeline
+            .start(() => new ActionAdapter(config, octokit).fetch())
+            .output({next: data => console.log(JSON.stringify(data, null, 1))});;
+    
 }
 
 function parseArgs() {
