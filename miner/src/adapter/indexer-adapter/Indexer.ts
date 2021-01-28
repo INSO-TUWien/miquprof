@@ -1,4 +1,3 @@
-import {IOutputAdapter} from "../oultput-adapter/IOutputAdapter";
 import {IIssueIndexer} from "./interfaces/IIssueIndexer";
 import {Issue} from "../endpoint-adapter/outputModels/Issue";
 import {Issue as OutputIssue} from "../indexer-adapter/outputModels/Issue";
@@ -9,12 +8,12 @@ import {ICommitIndexer} from "./interfaces/ICommitIndexer";
 import {Observable} from "rxjs";
 
 export class Indexer implements IIssueIndexer, ICommitIndexer{
-    private outputAdapter: IOutputAdapter;
+    private outputAdapter: any;
     private usersEmails: string[] = [];
     private issuesFinished = false;
     private commitsFinished = false;
 
-    constructor(outputAdapter: IOutputAdapter) {
+    constructor(outputAdapter: any) {
         this.outputAdapter = outputAdapter;
     }
 

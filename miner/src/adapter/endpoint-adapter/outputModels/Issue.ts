@@ -5,11 +5,11 @@ export class Issue {
     public author: User;
     public createdAt: Date;
     public closed: Boolean;
-    public title: String;
+    public title: string;
     public number: Number;
-    public textBody: String;
+    public textBody: string;
 
-    constructor(id: string, author: User, createdAt: Date, closed: Boolean, title: String, number: Number, textBody: String) {
+    constructor(id: string, author: User, createdAt: Date, closed: Boolean, title: string, number: Number, textBody: string) {
         this.id = id;
         this.author = author;
         this.createdAt = createdAt;

@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 import { Branch } from "../endpoint-adapter/adapters/githubOctokit/BranchAdapter";
 
 export  function indexBranches (pipeline: Observable<Branch[]>) {
-    return new Observable(subscriber => {
+    return new Observable<string[]>(subscriber => {
         let branchIds: string[] = [];
         const observer = {
             next: (branches: Branch[]) => {
