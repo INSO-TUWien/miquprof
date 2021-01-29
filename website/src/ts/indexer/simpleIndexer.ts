@@ -6,20 +6,32 @@ const db = new PouchDB('project.db');
 
 export class SimpleIndexer {
     private db: any;
+    private reader: FileReader;
     constructor() {
         this.db = new PouchDB('project.db');
         // PouchDB.plugin('relational-pouch');
         PouchDB.plugin(PouchFind);
         // PouchDB.plugin(require('pouchdb-silverlining')); 
+        this.reader = new FileReader();
+        this.reader.onerror = console.log;
     }
 
-    public importFile(files: File[]) {
-        Array.from(files).forEach(f => {
-            // @ts-ignore
-            const file = require(f.name);
-            console.log(file);
-        });
+    public importFiles(files: File[]) {
+        if (files.length <= 0) {
+            return;
+        }
+        const file = files.pop();
+        this.reader.onload = () => {
+            console.log(this.reader.result);
+            this.importFiles(files);
+        };
+        if (file !== undefined) {
+            this.reader.readAsText(file);
+        }
     }
+
+
+
 }
 
 // // @ts-ignore
