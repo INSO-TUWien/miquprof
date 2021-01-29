@@ -3,18 +3,16 @@ import dotenv from 'dotenv';
 import { Pipeline } from './adapter/endpoint-adapter/helpers/pipleine';
 import { Octokit } from '@octokit/rest';
 import { OutputJSON } from './adapter/oultput-adapter/Output';
-import { ActionAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/ActionAdapter';
-import { fetchIssues } from './adapter/endpoint-adapter/adapters/githubOctokit/IssueAdapter';
+import { fetchBranches } from './adapter/endpoint-adapter/adapters/githubOctokit/BranchAdapter';
+import { indexBranches } from './adapter/indexer-adapter/branchIndexer';
+import { CommitAdapter } from './adapter/endpoint-adapter/adapters/githubOctokit/CommitAdapter';
 
 let flags: any;
 
 function main() {
+    // TODO: add progress bar or some loading indication
     parseArgs();
     dotenv.config();
-    // const indexer = new Indexer(ouputAdapter)
-    // const githubOctokitIssueAdapter = new GithubOctokitIssueAdapter();
-    // const githubOctokitCommitAdapter = new GithubOctokitCommitAdapter();
-    // const githubOctokitActionsAdapter = new GithubOctokitActionsAdapter();
     const config = {
         owner: flags.owner,
         repo: flags.repo,
@@ -23,21 +21,20 @@ function main() {
     const octokit = new Octokit({
         auth: `token ${config.privateAccessToken}`
       });
-
-    const ouputAdapter = new OutputJSON();
-    // Pipeline
-    //     .start(() => fetchBranches(config, octokit))
-    //     .nextSplit(indexBranches, { next: branches => ouputAdapter.exportBranch(branches) })
-    //     .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
-    //     .output({next: (commits) => ouputAdapter.exportCommit(commits)});
+    const outputAdapter = new OutputJSON();
+    Pipeline
+        .start(() => fetchBranches(config, octokit))
+        .nextSplit(indexBranches, { next: branches => outputAdapter.export(branches, 'Branch', (b) => b.id) })
+        .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
+        .output({next: (commits) => outputAdapter.export(commits, 'Commit', (c) => c.id)});
         
     // Pipeline
     //     .start(() => new ActionAdapter(config, octokit).fetch())
-    //     .output({next: data => console.log(JSON.stringify(data, null, 1))});;
+    //     .output({next: workflow => outputAdapter.export(workflow, 'Workflow', (w) => w.id.toString())});;
 
-    Pipeline
-        .start(() => fetchIssues(config, octokit))
-        .output({next: data => console.log(JSON.stringify(data, null, 1))});
+    // Pipeline
+    //     .start(() => fetchIssues(config, octokit))
+    //     .output({next: (issue) => outputAdapter.export(issue, 'Issue', (i) => i.id.toString())});
     
 }
 

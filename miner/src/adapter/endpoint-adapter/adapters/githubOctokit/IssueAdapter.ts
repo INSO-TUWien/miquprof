@@ -1,5 +1,5 @@
 import { IConfigGithubOctokit } from "./config/IConfigGithubOctokit";
-import { Observable, Subscriber } from "rxjs";
+import { Observable } from "rxjs";
 import { Octokit } from "@octokit/rest";
 import { checkOctokitResult } from "../../helpers/checkOctokitResult";
 
