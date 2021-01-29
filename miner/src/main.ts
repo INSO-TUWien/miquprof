@@ -11,6 +11,7 @@ let flags: any;
 
 function main() {
     // TODO: add progress bar or some loading indication
+    // TODO: increase fetches per page
     parseArgs();
     dotenv.config();
     const config = {
@@ -22,11 +23,11 @@ function main() {
         auth: `token ${config.privateAccessToken}`
       });
     const outputAdapter = new OutputJSON();
-    Pipeline
-        .start(() => fetchBranches(config, octokit))
-        .nextSplit(indexBranches, { next: branches => outputAdapter.export(branches, 'Branch', (b) => b.id) })
-        .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
-        .output({next: (commits) => outputAdapter.export(commits, 'Commit', (c) => c.id)});
+    // Pipeline
+    //     .start(() => fetchBranches(config, octokit))
+    //     .nextSplit(indexBranches, { next: branches => outputAdapter.export(branches, 'Branch', (b) => b.id) })
+    //     .next((pipeline) => (new CommitAdapter(config, octokit)).fetchCommits(pipeline))
+    //     .output({next: (commits) => outputAdapter.export(commits, 'Commit', (c) => c.id)});
         
     // Pipeline
     //     .start(() => new ActionAdapter(config, octokit).fetch())
