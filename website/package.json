@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "yarn tsc && yarn run browserify build/indexer/simpleIndexer.js -o src/website/js/main.js"
+    "build": "yarn tsc && yarn run browserify build/ts/main.js -o src/website/js/main.js"
   },
   "devDependencies": {
     "@types/pouchdb": "^6.4.0",
