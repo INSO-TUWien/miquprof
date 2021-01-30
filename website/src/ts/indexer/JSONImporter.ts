@@ -1,17 +1,15 @@
-import PouchDB from 'pouchdb';
-import PouchFind from 'pouchdb-find'
-const db = new PouchDB('project.db');
 // db.bulkDocs(commit);
 // db.bulkDocs(issues);
 
-export class SimpleIndexer {
-    private db: any;
+import { DatabaseHandler } from "../DatabaseHandler";
+
+
+export class JSONImporter {
+    private dbHandler: DatabaseHandler;
     private reader: FileReader;
-    constructor() {
-        this.db = new PouchDB('project.db');
-        // PouchDB.plugin('relational-pouch');
-        PouchDB.plugin(PouchFind);
-        // PouchDB.plugin(require('pouchdb-silverlining')); 
+    
+    constructor(dbHandler: DatabaseHandler) {
+        this.dbHandler = dbHandler;
         this.reader = new FileReader();
         this.reader.onerror = console.log;
     }
@@ -22,16 +20,16 @@ export class SimpleIndexer {
         }
         const file = files.pop();
         this.reader.onload = () => {
-            console.log(this.reader.result);
+            const type = file?.name.split('-')[0];
+            if (this.reader.result && (type === 'Branch' || type === 'Commit' || type === 'Issue' || type === 'Workflow')) {
+                this.dbHandler.import(type, JSON.parse(this.reader.result?.toString()));
+            }
             this.importFiles(files);
         };
         if (file !== undefined) {
             this.reader.readAsText(file);
         }
     }
-
-
-
 }
 
 // // @ts-ignore
