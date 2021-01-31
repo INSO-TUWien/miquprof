@@ -24,13 +24,16 @@
     <p>input your query</p>
     <div class="box">
         <div id="editor">async () => { 
-    await db.createIndex({
+    await issues.createIndex({
         index: {fields: ['title']}
     });
-    return await db.find({
+    
+    const i = await issues.find({
         selector: {title: {$gt: null}},
         sort: ['title']
     });
+    
+    return i.docs.map(issue => issue.title);
 }</div>
     </div>
     <button id="run" type="button">Run query</button>

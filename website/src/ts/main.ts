@@ -12,6 +12,7 @@ class Main {
         editor.setTheme("ace/theme/monokai");
         editor.session.setMode("ace/mode/typescript");
         editor.session.setTabSize(4);
+
         // register handler for file import
         const fileInput = document.getElementById('fileInput');
         if (fileInput) {
@@ -35,11 +36,12 @@ class Main {
     }
 
     private async executeQuery(q: string) {
-        const db = this.dbHandler.getDB();
+        const branches = this.dbHandler.getDB('Branch');
+        const commits = this.dbHandler.getDB('Commit');
+        const issues = this.dbHandler.getDB('Issue');
+        const workflows = this.dbHandler.getDB('Workflow');
         let result;
         eval(`(${q})().then(console.log)`);
-        // @ts-ignore
-        console.log(result);
     }
 }
 
