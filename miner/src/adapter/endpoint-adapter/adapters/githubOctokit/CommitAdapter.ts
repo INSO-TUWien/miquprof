@@ -1,6 +1,7 @@
 import {IConfigGithubOctokit} from "./config/IConfigGithubOctokit";
 import { Observable } from "rxjs";
 import { Octokit } from "@octokit/rest";
+import { Branch } from "./BranchAdapter";
 export interface Commit {
   message: string | undefined,
   id: string,
@@ -27,19 +28,18 @@ export class CommitAdapter {
   private octokit: Octokit;
   private fetchedShas: Set<string> = new Set();
 
-  constructor(config: IConfigGithubOctokit, octokit:Octokit) {
+  constructor(config: IConfigGithubOctokit, octokit: Octokit) {
     this.config = config;
     this.octokit = octokit;
   }
 
-  public fetchCommits (pipeline: Observable<string[]>): Observable<Commit[]> {
+  public fetchCommits (pipeline: Observable<Branch[]>): Observable<Commit[]> {
     return new Observable<Commit[]>(subscriber => {
       const observer = {
-        next: (historyShas: string[]) => {
-          this.fetchCommitShas(historyShas)
-            .then(commitShas => this.fetchCommitsBySha(commitShas))
-            .then(commits => this.fetchCommitFiles(commits))
-            .then(shas => subscriber.next(shas));
+        next: (branches: Branch[]) => {
+          this.fetchCommitsBySha(this.branchesToShas(branches))
+            .then(res => this.fetchCommitFiles(res))
+            .then(res => subscriber.next(res)); // do not use then(subscriber.next), it can cause errors
         },
         error: subscriber.error
       }
@@ -47,34 +47,25 @@ export class CommitAdapter {
     });
   }
 
-  public async fetchCommitShas(historySha: string[]): Promise<string[]> {
-    let shas: string[] = [];
-    for(const commitSha of historySha) {
-      const per_page = 10; 
-      let running = true;
-      let page = 1;
-
-      while (running) {
-        const res = await this.octokit.repos.listCommits({
-          owner: this.config.owner,
-          repo: this.config.repo,
-          sha: commitSha,
-          per_page: per_page,
-          page: page++
-        });
-        this.checkOctokitResult(res);
-        running = res.data.length === per_page;
-        res.data.forEach(commit => shas.push(commit.sha))
-        shas =  [...new Set(shas)]; // eliminate duplicates
+  public branchesToShas(branches: Branch[]) {
+    const shas = [];
+    for(let branch of branches) {
+      for (let sha of branch.history) {
+        shas.push(sha);
       }
     }
-    shas = shas.filter(sha => !this.fetchedShas.has(sha));
-    shas.forEach(sha => this.fetchedShas.add(sha));
-    return shas;
+    const res = [];
+    for(let sha of shas) {
+      if (!this.fetchedShas.has(sha)) {
+        this.fetchedShas.add(sha);
+        res.push(sha);
+      }
+    }
+    return res;
   }
 
   public async fetchCommitsBySha(commitShas: string[]): Promise<Commit[]> {
-    return await Promise.all(commitShas.map(async sha => {
+    return await Promise.all(commitShas.map(async (sha) => {
       const res = await this.octokit.git.getCommit({
         repo: this.config.repo,
         owner: this.config.owner,
@@ -85,7 +76,7 @@ export class CommitAdapter {
       return {
         id: sha,
         message: commit.message,
-        tree: { id: commit.tree.sha}
+        tree: { id: commit.tree.sha},
       } as Commit;
     }));
   }
@@ -99,7 +90,7 @@ export class CommitAdapter {
       });
       this.checkOctokitResult(res);
 
-      commit.files = res.data.files?.map(file => {
+      commit.files = res.data.files?.map((file: any) => {
         return {
           id: file.sha,
           filename: file.filename,
@@ -122,55 +113,3 @@ export class CommitAdapter {
     }
   }
 }
-
-// function createCommitObservable (cb: (branches: Branch[], subscriber: Subscriber<Commit[]>) => Promise<Commit[]>, pipeline: Observable<Branch[]>) {
-//   return new Observable<Commit[]>(subscriber => {
-//       const observer = {
-//         next: (data: Branch[]) => {
-//             cb(data, subscriber)
-//             .then(branch => subscriber.next(branch));
-//         },
-//         error: subscriber.error,
-//       };
-//       pipeline.subscribe(observer);
-//   });
-// }
-
-// export function fetchCommitTrees(config: IConfigGithubOctokit, octokit:Octokit, pipeline: Observable<Branch[]>) {
-//   return createBranchObservable(async (branches: Branch[], subscriber) => {
-//     return await Promise.all(branches.map(async branch => {
-//         branch.history = await Promise.all(branch.history.map(async (commit: Commit) => {
-//           if (commit.tree?.sha === undefined) {
-//             return commit;
-//           }
-//           commit.tree = await fillTree(octokit, config, commit.tree, subscriber);
-//           return commit;
-//         }));
-//       return branch;
-//     }));
-//   }, pipeline);
-// }
-
-// const fillTree = async function(octokit: Octokit, config: IConfigGithubOctokit, tree: CommitTree, subscriber: Subscriber<Branch[]>) {
-//   const res = await octokit.git.getTree({
-//     repo: config.repo,
-//     owner: config.owner,
-//     tree_sha: tree.sha
-//   });
-//   if (checkOctokitResult(res, subscriber)) {
-//     return tree;
-//   }
-//   tree.files = res.data.tree.map(file => {
-//     let result: TreeFile = {
-//       sha: file.sha
-//     };
-//     switch (file.type) {
-//       case 'tree':
-//         break;
-//       case 'blob':
-//         break;
-//     }
-//     return result;
-//   });
-//   return tree;
-// }
