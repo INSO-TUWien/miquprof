@@ -12,40 +12,47 @@ export interface Issue {
     labels: string[]
 }
 
-export function fetchIssues (config: IConfigGithubOctokit, octokit: Octokit) {
-  let result = new Observable<Issue[]>(subscriber => {
-    const fetch = async() => {
+export class IssueAdapter {
+  private config: IConfigGithubOctokit;
+  private octokit: Octokit;
+
+  constructor(config: IConfigGithubOctokit, octokit: Octokit) {
+    this.config = config;
+    this.octokit = octokit;
+  }
+
+  public async fetchIssues () {
+      let issues: Issue[] = [];
       let page = 1;
-      let running = true;
+      let running = true; 
       const fetchPerPage = 10;
       do {
-        const res = await octokit.issues.listForRepo({
-          owner: config.owner,
-          repo: config.repo,
+        const res = await this.octokit.issues.listForRepo({
+          owner: this.config.owner,
+          repo: this.config.repo,
           per_page: fetchPerPage,
           page: page++
         });
-        if (checkOctokitResult(res, subscriber)) {
+        if (checkOctokitResult(res)) {
           running = false;
         } else {
           running = res.data.length === fetchPerPage;
-          subscriber.next(res.data.map(issue => {
+          issues = issues.concat(res.data.map(issue => {
             return {
               id: issue.id,
               number: issue.number,
               title: issue.title,
               comments: issue.comments,
               updated_at: issue.updated_at,
-              labels: issue.labels.map(label => label.name)
+              labels: issue.labels.map(label => (typeof label === 'string' ? label:  label.name))
               // todo: maybe add PR or other data like user
-            }
-          }));
+            } as Issue
+          }))
         }
       } while(running);
-    }
-    fetch().catch(subscriber.error);
-  });
-  return result;
+      return issues;
+  }
+
 }
 
 
