@@ -27,12 +27,10 @@ export class ActionAdapter {
         this.octokit = octokit;
     }
 
-    public fetch(): Observable<Workflow[]> {
-        return new Observable<Workflow[]>(subscriber => {
-            this.fetchWorkflows()
-                .then(workflows => this.fetchActions(workflows))
-                .then(workflows => subscriber.next(workflows));
-        });
+    public async fetch(): Promise<Workflow[]> {
+        const workflows = await this.fetchWorkflows();
+        return await this.fetchActions(workflows);
+        
     }
 
     private async fetchWorkflows (): Promise<Workflow[]> {
@@ -81,7 +79,7 @@ export class ActionAdapter {
                         name: run.name,
                         status: run.status,
                         event: run.event,
-                        commit_id: run.head_commit.id
+                        commit_id: run.head_commit?.id ?? ''
                     } as WorkflowRun }));
             } while(running);
             return workflow;
