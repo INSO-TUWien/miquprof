@@ -1,5 +1,3 @@
-// db.bulkDocs(commit);
-// db.bulkDocs(issues);
 
 import { DatabaseHandler } from "../DatabaseHandler";
 
@@ -31,6 +29,3 @@ export class JSONImporter {
         }
     }
 }
-
-// // @ts-ignore
-// db.sql("SELECT * FROM product").then(console.log);
