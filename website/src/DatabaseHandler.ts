@@ -1,17 +1,27 @@
 import PouchDB from 'pouchdb';
 import PouchFind from 'pouchdb-find'
+import { v4 } from 'uuid';
 
 export type DataTypes = 'Branch' | 'Commit' | 'Issue' | 'Workflow';
 
 export class DatabaseHandler {
+    private static instance: DatabaseHandler;
     private branchDB: any;
     private commitDB: any;
     private issueDB: any;
     private workflowDB: any;
 
-    constructor() {
+    private constructor() {
         PouchDB.plugin(PouchFind);
         this.createDB().then(console.log);
+    }
+
+    public static getIntance() {
+        if (!this.instance) {
+            this.instance = new DatabaseHandler();
+        }
+
+        return this.instance;
     }
 
     public import(type: DataTypes, data: any) {
@@ -22,7 +32,7 @@ export class DatabaseHandler {
 
         const doc = {
             ...data,
-            _id: data.id.toString()
+            _id: data?.id?.toString() ?? data?.oid?.toString() ?? v4()
         };
         try {
             db.put(doc);
