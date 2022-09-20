@@ -1,17 +1,24 @@
-// db.bulkDocs(commit);
-// db.bulkDocs(issues);
 
 import { DatabaseHandler } from "../DatabaseHandler";
 
 
 export class JSONImporter {
+    private static instance: JSONImporter;
     private dbHandler: DatabaseHandler;
     private reader: FileReader;
     
-    constructor(dbHandler: DatabaseHandler) {
+    private constructor(dbHandler: DatabaseHandler) {
         this.dbHandler = dbHandler;
         this.reader = new FileReader();
         this.reader.onerror = console.log;
+    }
+
+    public static getIntance(dbHandler: DatabaseHandler) {
+        if (!this.instance) {
+            this.instance = new JSONImporter(dbHandler);
+        }
+
+        return this.instance;
     }
 
     public importFiles(files: File[]) {
@@ -31,6 +38,3 @@ export class JSONImporter {
         }
     }
 }
-
-// // @ts-ignore
-// db.sql("SELECT * FROM product").then(console.log);
