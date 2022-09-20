@@ -10,3 +10,7 @@ The miner currently supports to fetch data from GitHub via the Octokit and isomo
 
 When using the miner, a private access token must be supplied as `PATOKEN` in a `.env` file in the source folder of the miner.
 Additionaly the owner, repo and the output folder can be supplied to the miner as a comandline argument.
+
+## Website
+
+The website allows a user to write and execute queries, as well as show the output. In order to run the website, all that you need to do is to execute the following in the website folder: `yarn install` followed by a 
